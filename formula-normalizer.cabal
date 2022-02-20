@@ -26,7 +26,12 @@ source-repository head
 library
   exposed-modules:
       Formula
+      FormulaToCNF
+      FormulaToDNF
+      FormulaToNNF
+      IO
       Lib
+      Parser
   other-modules:
       Paths_formula_normalizer
   hs-source-dirs:
@@ -34,6 +39,7 @@ library
   build-depends:
       QuickCheck
     , base >=4.7 && <5
+    , mtl ==2.*
   default-language: Haskell2010
 
 executable formula-normalizer-exe
@@ -47,6 +53,7 @@ executable formula-normalizer-exe
       QuickCheck
     , base >=4.7 && <5
     , formula-normalizer
+    , mtl ==2.*
   default-language: Haskell2010
 
 test-suite formula-normalizer-test
@@ -61,4 +68,5 @@ test-suite formula-normalizer-test
       QuickCheck
     , base >=4.7 && <5
     , formula-normalizer
+    , mtl ==2.*
   default-language: Haskell2010
