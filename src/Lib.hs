@@ -1,6 +1,4 @@
-module Lib
-    ( someFunc
-    ) where
+module Lib (someFunc) where
 
 import IO (parseFormula)
 import Parser (runParserFully)

@@ -3,7 +3,7 @@ module Formula where
 type Symb = String 
 
 data Formula = Var Symb | T | F 
-          | Neg Formula    
+          | Not Formula    
           | And Formula Formula
           | Or Formula Formula
           | Impl Formula Formula

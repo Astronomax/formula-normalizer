@@ -3,18 +3,17 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Parser ( Parser
-                , parser
-                , runParser
-                , runParserFully
-                , satisfy ) where
+module Parser (Parser, 
+                parser, 
+                runParser, 
+                runParserFully, 
+                satisfy) where
 
 import Control.Monad.Fail (MonadFail)
 import Control.Monad.Except (Except, MonadError (catchError, throwError), runExcept)
 import Control.Applicative (Alternative ((<|>)), empty)
 import Data.Coerce (coerce)
 
--- Monadic parser that is used to parse lambda expressions from the command prompt
 newtype Parser a =
     Parser { runParser :: String -> Maybe (String, a) }
 
