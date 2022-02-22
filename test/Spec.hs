@@ -1,8 +1,11 @@
 {-# LANGUAGE InstanceSigs #-}
 
-import Test.QuickCheck
 import Formula
+import Parser (parseFormula)
+import Text.Parsec
+import Test.QuickCheck
 import Control.Monad
+import Data.Either
 
 newtype Name = Name { getName :: String }
 
@@ -29,16 +32,11 @@ instance Arbitrary Formula where
                                                             Impl <$> (l >>= genFormula) <*> (r >>= genFormula),
                                                             DImpl <$> (l >>= genFormula) <*> (r >>= genFormula) ]) ]
 
-
--- var name is not empty
-prop_Formula (Var s) = (length s) > 0
-prop_Formula T = True
-prop_Formula F = True
-prop_Formula (Not f) = prop_Formula f
-prop_Formula (And a b) = (prop_Formula a) && (prop_Formula b)
-prop_Formula (Or a b) = (prop_Formula a) && (prop_Formula b)
-prop_Formula (Impl a b) = (prop_Formula a) && (prop_Formula b)
-prop_Formula (DImpl a b) = (prop_Formula a) && (prop_Formula b)
+prop_Formula f = let    s = show f :: String
+                        p = parseFormula s :: Either ParseError Formula
+                        (Right d) = p
+                        in d == f
+    where types = f::Formula
 
 main :: IO ()
 main = quickCheck prop_Formula

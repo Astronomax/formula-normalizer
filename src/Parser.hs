@@ -3,66 +3,46 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Parser (Parser, 
-                parser, 
-                runParser, 
-                runParserFully, 
-                satisfy) where
+module Parser (parseFormula) where
 
-import Control.Monad.Fail (MonadFail)
-import Control.Monad.Except (Except, MonadError (catchError, throwError), runExcept)
-import Control.Applicative (Alternative ((<|>)), empty)
-import Data.Coerce (coerce)
+import Formula
+import Control.Applicative((<*))
+import Text.Parsec
+import Text.Parsec.String
+import Text.Parsec.Expr
+import Text.Parsec.Token
+import Text.Parsec.Language
 
-newtype Parser a =
-    Parser { runParser :: String -> Maybe (String, a) }
+def = emptyDef {    identStart = letter, 
+                    identLetter = alphaNum, 
+                    opStart = oneOf ['~', '/', '\\', '<', '-'], 
+                    opLetter = oneOf ['~', '/', '\\', '<', '>', '-'], 
+                    reservedOpNames = ["~", "/\\", "\\/", "->", "<->"], 
+                    reservedNames = ["1", "0"] }
 
-parser :: (String -> Maybe (String, a)) -> Parser a
-parser = Parser
+TokenParser {   parens = m_parens, 
+                identifier = m_identifier, 
+                reservedOp = m_reservedOp, 
+                reserved = m_reserved, 
+                semiSep1 = m_semiSep1, 
+                whiteSpace = m_whiteSpace } = makeTokenParser def
 
-runParserFully :: Parser a -> String -> Maybe a
-runParserFully (Parser f) s = case f s of
-    Just ([], r) -> Just r
-    _            -> Nothing 
+exprparser :: Parser Formula
+exprparser = buildExpressionParser table term <?> "expression"
 
-instance Functor Parser where
-    fmap :: forall a b. (a -> b) -> Parser a -> Parser b
-    fmap = coerce ( fmap . fmap . fmap
-        :: (a -> b) -> (String -> Maybe (String, a)) -> (String -> Maybe (String, b)) )
+table = [ [Prefix (m_reservedOp "~" >> return Not)],
+          [Infix (m_reservedOp "/\\" >> return And) AssocLeft],
+          [Infix (m_reservedOp "\\/" >> return Or) AssocLeft],
+          [Infix (m_reservedOp "->" >> return Impl) AssocLeft],
+          [Infix (m_reservedOp "<->" >> return DImpl) AssocLeft] ]
 
-instance Applicative Parser where
-    pure :: a -> Parser a
-    pure x = Parser $ \s -> pure (s, x)
+term = m_parens exprparser <|> 
+    fmap Var m_identifier <|> 
+    (m_reserved "1" >> return T) <|> 
+    (m_reserved "0" >> return F)
 
-    (<*>) :: Parser (a -> b) -> Parser a -> Parser b
-    Parser u <*> Parser v = Parser f where
-        f xs = do
-            (xs', fun) <- u xs
-            (xs'', arg) <- v xs'
-            return (xs'', fun arg)
+mainparser :: Parser Formula
+mainparser = m_whiteSpace >> exprparser <* eof
 
-instance Alternative Parser where
-    empty :: Parser a
-    empty = Parser $ const empty
-
-    (<|>) :: Parser a -> Parser a -> Parser a
-    Parser u <|> Parser v = Parser f where
-        f xs = u xs `catchError` const (v xs)
-
-instance Monad Parser where
-    return = pure
-
-    (>>=) :: Parser a -> (a -> Parser b) -> Parser b
-    (Parser u) >>= f = Parser g where
-        g xs = do
-            (xs', y) <- u xs
-            runParser (f y) xs'
-
-instance MonadFail Parser where
-    fail :: String -> Parser a
-    fail _ = empty
-
-satisfy :: (Char -> Bool) -> Parser Char
-satisfy p = parser f where
-  f (c:cs) | p c = Just (cs,c)
-  f _            = Nothing
+parseFormula :: String -> Either ParseError Formula
+parseFormula = parse mainparser ""

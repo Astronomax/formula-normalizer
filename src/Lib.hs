@@ -1,9 +1,9 @@
 module Lib (someFunc) where
 
-import IO (parseFormula)
-import Parser (runParserFully)
+import Formula
+import Parser (parseFormula)
 
 someFunc :: IO ()
 someFunc = do
     s <- getLine
-    putStrLn $ show $ runParserFully parseFormula s
+    putStrLn $ show $ parseFormula s
