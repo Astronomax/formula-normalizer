@@ -2,6 +2,7 @@
 
 import Formula
 import Parser (parseFormula)
+import FormulaToNNF (formulaToNNF, isInNNF)
 import Text.Parsec
 import Test.QuickCheck
 import Control.Monad
@@ -32,11 +33,15 @@ instance Arbitrary Formula where
                                                             Impl <$> (l >>= genFormula) <*> (r >>= genFormula),
                                                             DImpl <$> (l >>= genFormula) <*> (r >>= genFormula) ]) ]
 
-prop_Formula f = let    s = show f :: String
-                        p = parseFormula s :: Either ParseError Formula
-                        (Right d) = p
-                        in d == f
+prop_ParsePrint f = let     s = show f :: String
+                            p = parseFormula s :: Either ParseError Formula
+                            (Right d) = p
+                            in d == f
     where types = f::Formula
 
+prop_NNF f = isInNNF $ formulaToNNF f
+
 main :: IO ()
-main = quickCheck prop_Formula
+main = do
+    quickCheck prop_ParsePrint
+    quickCheck prop_NNF
