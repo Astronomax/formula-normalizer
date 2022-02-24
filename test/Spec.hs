@@ -4,6 +4,7 @@ import Formula
 import Parser (parseFormula)
 import FormulaToNNF (formulaToNNF, isInNNF)
 import FormulaToDNF (formulaToDNF, isInDNF)
+import FormulaToCNF (formulaToCNF, isInCNF)
 import Text.Parsec
 import Test.QuickCheck
 import Control.Monad
@@ -42,6 +43,7 @@ prop_ParsePrint f = let     s = show f :: String
 
 prop_NNF f = isInNNF $ formulaToNNF f
 prop_DNF f = formulaLength (formulaToNNF f) < 100 ==> isInDNF $ formulaToDNF f
+prop_CNF f = formulaLength (formulaToNNF f) < 100 ==> isInCNF $ formulaToCNF f
     
 formulaLength :: Formula -> Int 
 formulaLength (Not a) = 1 + (formulaLength a)
@@ -56,3 +58,4 @@ main = do
     quickCheck prop_ParsePrint
     quickCheck prop_NNF
     quickCheck prop_DNF
+    quickCheck prop_CNF
