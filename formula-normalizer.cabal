@@ -31,6 +31,7 @@ library
       FormulaToNNF
       Lib
       Parser
+      Tseitin
   other-modules:
       Paths_formula_normalizer
   hs-source-dirs:
