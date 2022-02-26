@@ -1,5 +1,5 @@
 # formula-normalizer
-[![Haskell CI](https://github.com/SmnTin/simple-type-checker/actions/workflows/haskell.yml/badge.svg)](https://github.com/SmnTin/simple-type-checker/actions/workflows/haskell.yml)
+[![Haskell CI](https://github.com/Astronomax/formula-normalizer/actions/workflows/haskell.yml/badge.svg)](https://github.com/Astronomax/formula-normalizer/actions/workflows/haskell.yml)
 
 A simple translator of formulas into normal forms:
 *   Negative Normal Form (NNF)
