@@ -10,6 +10,11 @@ data Formula = Var Symb | T | F
           | DImpl Formula Formula   
     deriving Eq
 
+infix 4 `And`
+infix 3 `Or`
+infix 2 `Impl`
+infix 1 `DImpl`
+
 instance Show Formula where
     showsPrec _ (Var s) = showString s
     showsPrec _ T = showString "1"
